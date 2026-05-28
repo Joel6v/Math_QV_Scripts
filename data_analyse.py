@@ -26,6 +26,21 @@ def calculate_table(data, class_beginn, class_ends):
     rel_density = [rel_fre[i] / class_widths[i] for i in range(c)]
     return class_beginns, class_ends, class_widths, class_mid, frequency, rel_fre, rel_density, n
 
+def calculate_stats_histo(n, class_mid, frequency):
+    total = 0
+    for i in range(len(class_mid)):
+        total += class_mid[i] * frequency[i]
+    
+    average = total / n
+
+    emp_dev = 0 # empirical standard deviation
+    for i in range(len(class_mid)):
+        emp_dev += (class_mid[i] - average) ** 2 * frequency[i]
+    
+    emp_dev = (emp_dev / (n - 1)) ** (1/2) # important to use count-1
+
+    return average, emp_dev
+
 def calculate_stats(data):
     n = len(data)
     total = 0
@@ -114,7 +129,17 @@ def text_table_output(class_beginns, class_ends, class_widths, class_mid, freque
             str_rel_density
         )
 
-    print("=" * len(tableTitle))
+    print("=" * len(tableTitle), "End")
+
+def text_stats_hist_output(average, emp_dev):
+    title = "Statistiken vom Histogramm"
+    print("=" * len(title))
+    print(title)
+    print("=" * len(title))
+    print("Arithmetisches Mittel            = ", round(average, standard_accuracy))
+    print("Empirische Standardabweichung    = ", round(emp_dev, standard_accuracy))
+    print("=" * len(title), "End")
+
 
 def text_stats_output(sum, average, emp_dev, n):
     title = "Statistiken"
@@ -125,7 +150,7 @@ def text_stats_output(sum, average, emp_dev, n):
     print("Summe                            = ", round(sum, standard_accuracy))
     print("Arithmetisches Mittel            = ", round(average, standard_accuracy))
     print("Empirische Standardabweichung    = ", round(emp_dev, standard_accuracy))
-    print("=" * len(title))
+    print("=" * len(title), "End")
 
 def text_boxplot_output(quartil_1, quartil_2, quartil_3, iqa, max_probe_length, probe_start, probe_end, outliers_sub_min, outliers_above_max):
     title = "Statistiken fuer Boxplot"
@@ -133,7 +158,7 @@ def text_boxplot_output(quartil_1, quartil_2, quartil_3, iqa, max_probe_length, 
     print(title)
     print("=" * len(title))
     print("1. Quartil               = ", round(quartil_1, standard_accuracy))
-    print("2. Quratil/Median        = ", round(quartil_2, standard_accuracy))
+    print("2. Quartil/Median        = ", round(quartil_2, standard_accuracy))
     print("3. Quartil               = ", round(quartil_3, standard_accuracy))
     print("Interquatilabstand       = ", round(iqa, standard_accuracy))
     print("Maximale Fuehlerlaenge   = ", round(max_probe_length, standard_accuracy))
@@ -141,15 +166,17 @@ def text_boxplot_output(quartil_1, quartil_2, quartil_3, iqa, max_probe_length, 
     print("Fuehlerende              = ", round(probe_end, standard_accuracy))
     print("Ausreisser unter Fuehler : ", outliers_sub_min)
     print("Ausreisser ueber Fuehler : ", outliers_above_max)
-    print("=" * len(title))  
+    print("=" * len(title), "End")  
 
 
 # -----------------------------------------------
-# HAUPTPROGRAMM
+# Berrechnungen und Ausgaben
 # -----------------------------------------------
-data.sort() # wichtig, um für Statisiken
+data.sort() # wichtig, für Statisiken
 cb, ce, cw, cm, fr, rf, rd, n = calculate_table(data, class_beginn, class_ends)
 text_table_output(cb, ce, cw, cm, fr, rf, rd, n)
+agh, edh = calculate_stats_histo(n, cm, fr)
+text_stats_hist_output(agh, edh)
 sm, ag, ed, n = calculate_stats(data)
 text_stats_output(sm, ag, ed, n)
 q1, q2, q3, iqa, mp, ps, pe, qs, qa = calculate_boxplot_stats(data)
